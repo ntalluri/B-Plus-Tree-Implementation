@@ -38,6 +38,29 @@ class BTree {
          * Implement this function to insert in the B+Tree.
          * Also, insert in student.csv after inserting in B+Tree.
          */
+
+        if (root == null) {
+            root = new BTreeNode(t, true);
+            root.keys[0] = student.studentId;
+            root.values[0] = student.recordId;
+            root.n = 1; 
+
+        } else if (root.n == 2 * t - 1) {
+            BTreeNode newRoot = new BTreeNode(t, false);
+            
+            newRoot.children[0] = root;
+            newRoot.splitChild(0,root);
+            int i = 0;
+            if (newRoot.keys[0] < student.studentId) {
+                i++;
+            }
+            newRoot.children[i].insertNonFull(student);
+            newRoot = root;
+
+        } else {
+            root.insertNonFull(student);
+        }
+
         return this;
     }
 
@@ -63,4 +86,5 @@ class BTree {
          */
         return listOfRecordID;
     }
+
 }
