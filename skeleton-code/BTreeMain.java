@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 
 /**
@@ -14,7 +15,7 @@ public class BTreeMain {
         /** Read the input file -- input.txt */
         Scanner scan = null;
         try {
-            scan = new Scanner(new File("src/input.txt"));
+            scan = new Scanner(new File("skeleton-code/input.txt"));
         } catch (FileNotFoundException e) {
             System.out.println("File not found.");
         }
@@ -49,8 +50,17 @@ public class BTreeMain {
                             String major = s2.next();
                             String level = s2.next();
                             int age = Integer.parseInt(s2.next());
-                            /** TODO: Write a logic to generate recordID*/
-                            long recordID = ;
+                            /** TODO: Write a logic to generate recordID
+                             * based piazza post @108
+                            */
+                            long recordID;
+                            if (s2.hasNext()) {
+                                recordID = Long.parseLong(s2.next());
+                            } else {
+                                recordID = generateUniqueRecordID(bTree);
+                            }
+
+                            // System.out.println(recordID); TODO: Delete Later
 
                             Student s = new Student(studentId, age, studentName, major, level, recordID);
                             bTree.insert(s);
@@ -92,9 +102,21 @@ public class BTreeMain {
         }
     }
 
+    private static long generateUniqueRecordID(BTree bTree) {
+        Random rand = new Random();
+        long recordID;
+        do {
+            // randomly create a new recordID
+            recordID = Math.abs(rand.nextLong());
+        } while (bTree.search(recordID) != -1); // check if the generated ID already exists in the BTree
+
+        return recordID;
+    }
+
     private static List<Student> getStudents() {
 
-        /** TODO:
+        /**
+         * TODO:
          * Extract the students information from "Students.csv"
          * return the list<Students>
          */
