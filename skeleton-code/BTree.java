@@ -55,12 +55,11 @@ class BTree {
                 i++;
             }
             newRoot.children[i].insertNonFull(student);
-            newRoot = root;
+            root = newRoot;
 
         } else {
             root.insertNonFull(student);
         }
-
         return this;
     }
 
