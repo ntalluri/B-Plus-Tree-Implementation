@@ -14,7 +14,7 @@ public class BTreeMain {
         /** Read the input file -- input.txt */
         Scanner scan = null;
         try {
-            scan = new Scanner(new File("src/input.txt"));
+            scan = new Scanner(new File("skeleton-code/input.txt"));
         } catch (FileNotFoundException e) {
             System.out.println("File not found.");
         }
@@ -25,14 +25,24 @@ public class BTreeMain {
 
         BTree bTree = new BTree(degree);
 
-        /** Reading the database student.csv into B+Tree Node*/
+        /** Reading the database student.csv into B+Tree Node */
         List<Student> studentsDB = getStudents();
+
+        // have to delete file after getStudents() otherwise appends all the existing students again into file 
+        // however this can't actually exist here since we aren't allowed to modify the BTreeMain.java code
+        // we will need to move this either in getStudents or do it a different way
+        File file = new File("skeleton-code/Student.csv");
+        if (file.exists() && file.delete()) {
+            System.out.println("File deleted successfully");
+        } else {
+            System.err.println("Failed to delete the file");
+        }
 
         for (Student s : studentsDB) {
             bTree.insert(s);
         }
 
-        /** Start reading the operations now from input file*/
+        /** Start reading the operations now from input file */
         try {
             while (scan.hasNextLine()) {
                 Scanner s2 = new Scanner(scan.nextLine());
@@ -49,12 +59,12 @@ public class BTreeMain {
                             String major = s2.next();
                             String level = s2.next();
                             int age = Integer.parseInt(s2.next());
-                            /** TODO: Write a logic to generate recordID*/
+                            /**
+                             * TODO: Write a logic to generate recordID
+                             * based piazza post @108
+                             */
                             long recordID = ;
-
-                            Student s = new Student(studentId, age, studentName, major, level, recordID);
-                            bTree.insert(s);
-
+                            
                             break;
                         }
                         case "delete": {
@@ -94,7 +104,9 @@ public class BTreeMain {
 
     private static List<Student> getStudents() {
 
-        /** TODO:
+        /**
+         * TODO:
+         * 
          * Extract the students information from "Students.csv"
          * return the list<Students>
          */
