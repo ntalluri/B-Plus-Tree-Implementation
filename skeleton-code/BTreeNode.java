@@ -5,7 +5,8 @@ class BTreeNode {
      */
     long[] keys;
     /**
-     * Array of the values[recordID] stored in the node. This will only be filled when the node is a leaf node.
+     * Array of the values[recordID] stored in the node. This will only be filled
+     * when the node is a leaf node.
      */
     long[] values;
     /**
@@ -13,14 +14,16 @@ class BTreeNode {
      **/
     int t;
     /**
-     * Pointers to the children, if this node is not a leaf.  If
+     * Pointers to the children, if this node is not a leaf. If
      * this node is a leaf, then null.
      */
     BTreeNode[] children;
     /**
-     * number of key-value pairs in the B-tree
+     * Number of key-value pairs in this node.
+     * based on piazza post @109
      */
     int n;
+
     /**
      * true when node is leaf. Otherwise false
      */
@@ -35,11 +38,11 @@ class BTreeNode {
     BTreeNode(int t, boolean leaf) {
         this.t = t;
         this.leaf = leaf;
-        this.keys = new long[2 * t - 1];
+        this.keys = new long[2 * t];
         this.children = new BTreeNode[2 * t];
         this.n = 0;
         this.next = null;
-        this.values = new long[2 * t - 1];
+        this.values = new long[2 * t];
     }
 
     /**
@@ -136,4 +139,5 @@ class BTreeNode {
         n--;
         return popped;
     }
+
 }
