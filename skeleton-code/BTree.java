@@ -28,15 +28,113 @@ class BTree {
         this.t = t;
     }
 
+    /**
+
+     * Private helper method for search
+
+     * @param studentId (the key value)
+
+     * @return recordID for given StudentID
+
+     */
+
+     private long search(BTreeNode node, long studentId) {
+
+        if (node == null) {
+
+            System.out.println("Student ID has not been found.");
+
+            return -1;
+
+        }
+
+ 
+
+        int i = 0; // this is the index value that would be used for the
+
+                   // the node's key or value, and the pointer to children if
+
+                   // desired StudentID is not found in the node
+
+                   // would need to be reinitialized for children nodes
+
+ 
+
+        while (node.keys[i] < studentId) {
+
+            i++; // increment along the node until we find key >= studentId
+
+        }
+
+           
+
+        // if somehow the index is >= number of key/value pairs, error. Piazza post 109
+
+        if (node.n <= i) {
+
+            System.out.println("Error. Index out of bounds!");
+
+            return -1;
+
+        }
+
+ 
+
+        if (node.keys[i] == studentId && node.leaf) {
+
+            return node.values[i]; // return recordID
+
+        }
+
+ 
+
+        // if the key is found but isn't in leaf node
+
+        if (node.keys[i] == studentId && !node.leaf) {
+
+            return search(node.children[i+1], studentId); // we look at the
+
+            // right side of of the key, from rule lecture 7/19
+
+        }
+
+ 
+
+        // if key isn't found in leaf node
+
+        else if (node.leaf) {
+
+            System.out.println("Student ID has not been found.");
+
+            return -1;
+
+        }
+
+        else {
+
+            return search(node.children[i], studentId); // recursively go to children nodes
+
+        }
+    }
+
+ 
+
     long search(long studentId) {
+
         /**
+
          * TODO:
+
          * Implement this function to search in the B+Tree.
+
          * Return recordID for the given StudentID.
-         * Otherwise, print out a message that the given studentId has not been found in
-         * the table and return -1.
+
+         * Otherwise, print out a message that the given studentId has not been found in the table and return -1.
+
          */
-        return -1;
+
+        return search(root, studentId); // will use helper method for search
+
     }
 
 
@@ -179,9 +277,6 @@ class BTree {
             e.printStackTrace();
         }
     }
-        return true;
-    }
-
 
 
     /**
@@ -248,6 +343,9 @@ class BTree {
             // try to merge
             violationsPersist = merge(violatingNode, violatingNodeParent, violatingNodeGrandParent);
         }
+    
+        return true;
+    }
 
     
     /**
