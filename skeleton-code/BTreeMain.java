@@ -126,19 +126,16 @@ public class BTreeMain {
     }
 
     private static List<Student> getStudents() {
-
         /**
          * TODO:
          * 
          * Extract the students information from "Students.csv"
          * return the list<Students>
          */
-
         List<Student> studentList = new ArrayList<>();
         Scanner scnr = null;
         try {
             scnr = new Scanner(new File("skeleton-code/Student.csv"));
-
         } catch (FileNotFoundException e) {
             System.out.println("File not found.");
         }
@@ -156,7 +153,6 @@ public class BTreeMain {
                 student.recordId = Long.parseLong(studInfo[5]);
             }
             studentList.add(student);
-
         }
         return studentList;
     }
