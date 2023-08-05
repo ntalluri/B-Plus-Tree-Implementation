@@ -45,4 +45,99 @@ class BTreeNode {
         this.values = new long[2 * t];
     }
 
+    /**
+     * Traverses this internal BTreeNode and returns index of appropriate child pointer 
+     * given a key
+     * 
+     * @param key A long integer key (a studentId) to traverse for the appropriate
+     * range of in internalNode.keys
+     * @return An integer index for internalNode.children which should be 
+     * traversed to next given key
+     * @throws RuntimeException If BTreeNode is not an internal node, or if there is an
+     * error traversing it
+     * @author Steven Knaack
+     */
+     int traverseInternalNode(long key) {
+        // check internal node status
+        if (leaf) {
+            throw new RuntimeException("Given node is an internal node");
+        }
+
+        // traverse: return i if reached end of oversized array or if we find correct key
+        int childIndex = -1;
+        for (int i = 0; i <= keys.length; i++) {
+            if (i == keys.length) {
+                childIndex = i;
+                break;
+            }
+
+            long currKey = keys[i];
+            
+            if (currKey == 0 || key < currKey) {
+                childIndex = i;
+                break;
+            }
+        }
+
+        // check validity and return
+        if (childIndex < 0) {
+            throw new RuntimeException("Error while traversing internal node");
+        }
+
+        return childIndex;
+    }
+    /**
+     * If a leaf node: removes (with shuffle) and returns the studentId and recordId at
+     * the specified index from this BTreeNode if a leaf.
+     * 
+     * If an internal node: remove and return key at index, remove 'smaller' of two 
+     * children associated with (assumption is children were merged into the larger
+     * index)
+     *
+     * @param index Index of elements to pop
+     * @return A long array of format 
+     * { this.keys[index], this.values[index] } if a leaf or
+     * { this.keys[index], 0 } if an internal node
+     * and updates the given BTreeNode
+     * @author Steven Knaack
+     */
+     long[] pop(int index) {
+        // get return values
+        long keyToMove = keys[index];
+        long valueToMove = (leaf) ? values[index] : 0;
+
+        long[] popped = new long[] {keyToMove, valueToMove};
+
+        // shuffle elements 
+        for (int i = index + 1; i < n; i++) {
+            long tempKey = keys[i];
+            keys[i - 1] = tempKey;
+
+            if (leaf) {
+                long tempValue = values[i];
+                values[i - 1] = tempValue;
+            } else {
+                BTreeNode tempChild = children[i];
+                children[i - 1] = tempChild;
+            }
+        }
+
+        // Shuffle extra child if deleting last key
+        if (!leaf && index == n - 1) {
+            BTreeNode tempChild = children[index];
+            children[index] = tempChild;
+        }
+
+        // Delete last element
+        keys[n - 1] = 0;
+        if (leaf) {
+            values[n - 1] = 0;
+        } else {
+            children[n] = null;
+        }
+
+        n--;
+        return popped;
+    }
+
 }
