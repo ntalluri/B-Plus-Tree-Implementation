@@ -29,6 +29,16 @@ public class BTreeMain {
         /** Reading the database student.csv into B+Tree Node */
         List<Student> studentsDB = getStudents();
 
+        // have to delete file after getStudents() otherwise appends all the existing students again into file 
+        // however this can't actually exist here since we aren't allowed to modify the BTreeMain.java code
+        // we will need to move this either in getStudents or do it a different way
+        File file = new File("skeleton-code/Student.csv");
+        if (file.exists() && file.delete()) {
+            System.out.println("File deleted successfully");
+        } else {
+            System.err.println("Failed to delete the file");
+        }
+
         for (Student s : studentsDB) {
             bTree.insert(s);
         }
@@ -54,6 +64,7 @@ public class BTreeMain {
                              * TODO: Write a logic to generate recordID
                              * based piazza post @108
                              */
+
                             long recordID;
                             if (s2.hasNext()) {
                                 recordID = Long.parseLong(s2.next());
