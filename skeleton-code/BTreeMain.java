@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 
 /**
@@ -63,8 +64,19 @@ public class BTreeMain {
                              * TODO: Write a logic to generate recordID
                              * based piazza post @108
                              */
-                            long recordID = ;
-                            
+
+                            long recordID;
+                            if (s2.hasNext()) {
+                                recordID = Long.parseLong(s2.next());
+                            } else {
+                                recordID = generateUniqueRecordID(bTree);
+                            }
+
+                            // System.out.println(recordID); TODO: Delete Later
+
+                            Student s = new Student(studentId, age, studentName, major, level, recordID);
+                            bTree.insert(s);
+
                             break;
                         }
                         case "delete": {
@@ -102,6 +114,17 @@ public class BTreeMain {
         }
     }
 
+    private static long generateUniqueRecordID(BTree bTree) {
+        Random rand = new Random();
+        long recordID;
+        do {
+            // randomly create a new recordID
+            recordID = Math.abs(rand.nextLong());
+        } while (bTree.search(recordID) != -1); // check if the generated ID already exists in the BTree
+
+        return recordID;
+    }
+
     private static List<Student> getStudents() {
 
         /**
@@ -112,6 +135,29 @@ public class BTreeMain {
          */
 
         List<Student> studentList = new ArrayList<>();
+        Scanner scnr = null;
+        try {
+            scnr = new Scanner(new File("skeleton-code/Student.csv"));
+
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found.");
+        }
+
+        while (scnr.hasNextLine()) {
+            Student student = new Student(0, 0, null, null, null, 0);
+            String line = scnr.nextLine();
+            if (line != null) {
+                String[] studInfo = line.split(",");
+                student.studentId = Long.parseLong(studInfo[0]);
+                student.studentName = studInfo[1];
+                student.major = studInfo[2];
+                student.level = studInfo[3];
+                student.age = Integer.parseInt(studInfo[4]);
+                student.recordId = Long.parseLong(studInfo[5]);
+            }
+            studentList.add(student);
+
+        }
         return studentList;
     }
 }
