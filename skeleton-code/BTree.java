@@ -513,8 +513,6 @@ class BTree {
      * @author Steven Knaack
      */
     private boolean merge(BTreeNode node, BTreeNode parent, BTreeNode grandParent) {
-        // TODO Write this method
-
         // find appropriate sibling
         long key = node.keys[0];
         int key_index =  parent.traverseInternalNode(key);
@@ -579,13 +577,29 @@ class BTree {
     List<Long> print() {
 
         List<Long> listOfRecordID = new ArrayList<>();
-
+        BTreeNode node = root;
         /**
-         * TODO:
-         * Implement this function to print the B+Tree.
-         * Return a list of recordIDs from left to right of leaf nodes.
-         *
-         */
+         
+    TODO:
+    Implement this function to print the B+Tree.
+    Return a list of recordIDs from left to right of leaf nodes.**/
+        if (node == null) {
+            System.out.println("No values to print");
+            return null;
+         } else {
+            // attain leftmost leaf node
+            while (node.leaf != false) {
+                node = node.children[0];
+            }
+
+            while (node != null) {
+                for (int i = 0; i < node.n; i++) {
+                    listOfRecordID.add(node.values[i]);
+                }
+                node = node.next;
+            }
+         }
+
         return listOfRecordID;
     }
 
