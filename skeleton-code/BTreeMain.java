@@ -26,14 +26,14 @@ public class BTreeMain {
 
         BTree bTree = new BTree(degree);
 
-        /** Reading the database student.csv into B+Tree Node*/
+        /** Reading the database student.csv into B+Tree Node */
         List<Student> studentsDB = getStudents();
 
         for (Student s : studentsDB) {
             bTree.insert(s);
         }
 
-        /** Start reading the operations now from input file*/
+        /** Start reading the operations now from input file */
         try {
             while (scan.hasNextLine()) {
                 Scanner s2 = new Scanner(scan.nextLine());
@@ -50,9 +50,10 @@ public class BTreeMain {
                             String major = s2.next();
                             String level = s2.next();
                             int age = Integer.parseInt(s2.next());
-                            /** TODO: Write a logic to generate recordID
+                            /**
+                             * TODO: Write a logic to generate recordID
                              * based piazza post @108
-                            */
+                             */
                             long recordID;
                             if (s2.hasNext()) {
                                 recordID = Long.parseLong(s2.next());
@@ -117,11 +118,35 @@ public class BTreeMain {
 
         /**
          * TODO:
+         * 
          * Extract the students information from "Students.csv"
          * return the list<Students>
          */
 
         List<Student> studentList = new ArrayList<>();
+        Scanner scnr = null;
+        try {
+            scnr = new Scanner(new File("skeleton-code/Student.csv"));
+
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found.");
+        }
+
+        while (scnr.hasNextLine()) {
+            Student student = new Student(0, 0, null, null, null, 0);
+            String line = scnr.nextLine();
+            if (line != null) {
+                String[] studInfo = line.split(",");
+                student.studentId = Long.parseLong(studInfo[0]);
+                student.studentName = studInfo[1];
+                student.major = studInfo[2];
+                student.level = studInfo[3];
+                student.age = Integer.parseInt(studInfo[4]);
+                student.recordId = Long.parseLong(studInfo[5]);
+            }
+            studentList.add(student);
+
+        }
         return studentList;
     }
 }
