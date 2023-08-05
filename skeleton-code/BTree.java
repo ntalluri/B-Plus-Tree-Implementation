@@ -88,20 +88,28 @@ class BTree {
         // delete studentId from Student.csv
         deleteFromCSV(studentId);
 
-        // check for violations
-        if (file.n >= t) {
-            return true;
+        // Fix violations
+
+        boolean violationsPersist = file.n < file.t;
+        BTreeNode violatingNode;
+        BTreeNode violatingNodeParent;
+        BTreeNode violatingNodeGrandParent;
+
+        while (violationsPersist && path.size() > 0) {
+            // get nodes
+            violatingNode = path.remove(path.size() - 1);
+            violatingNodeParent = (path.size() > 0) ? path.get(path.size() - 1) : null;
+            violatingNodeGrandParent = (path.size() > 1) ? path.get(path.size() - 2) : null;
+
+            // try to redistribute
+            violationsPersist = redistribute(violatingNode, violatingNodeParent);
+            if (!violationsPersist) return true;
+
+            // try to merge
+            violationsPersist = merge(violatingNode, violatingNodeParent, violatingNodeGrandParent);
         }
 
-        // fix violations if present
-        boolean violationsFixed = redistribute(file, fileParent);
-        if (violationsFixed) {
-            return true;
-        }
-
-        violationsFixed = mergeForDelete(path);
-        
-        return violationsFixed;
+        return true;
     }
 
     /**
@@ -195,7 +203,7 @@ class BTree {
     }
 
     /**
-     * Attempts to redistribute elements from violating node file
+     * Attempts to redistribute elements from a non-root violating node file
      * and its next sibling.
      *
      * @param file The violating node
@@ -204,33 +212,48 @@ class BTree {
      * @author Steven Knaack
      */
     private static boolean redistribute(BTreeNode file, BTreeNode parent) {
-        // TODO update to generalize
         // determine if we can redistribute 
-        BTreeNode nextFile = file.next;
+        int childIndex = parent.traverseInternalNode(file.keys[0]);
+
+        if (childIndex == parent.n) return false;
+
+        BTreeNode nextFile = parent.children[childIndex + 1];
+        
         int t = file.t;
-        if (nextFile == null || nextFile.n == t) return false;
+        if (nextFile.n == t) return false;
+        
 
         // pop first element from nextFile
+        long keyToMove = 0;
+        long valueToMove = 0;
+        BTreeNode childToMove = null;
+        if (!file.leaf) {
+            childToMove = nextFile.children[0];
+            keyToMove = childToMove.keys[0];
+        }
+
         long[] popped = nextFile.pop(0);
 
-        long keyToMove = popped[0];
-        long valueToMove = popped[1];
+        if (file.leaf) {
+           keyToMove = popped[0];
+           valueToMove = popped[1];
+        } 
 
-        // add the elements to move to File
-        file.keys[t - 1] = keyToMove;
-        file.values[t - 1] = valueToMove;
+        // add the element to move to File
+        file.keys[file.n] = keyToMove;
+
+        if (file.leaf) {
+            file.values[file.n] = valueToMove;
+        } else {
+            file.children[file.n + 1] = childToMove;
+            
+        }
         file.n++;
 
         // copy up first element key of nextFile to parent node and return
         long newKey = nextFile.keys[0];
         long keyInFile = file.keys[0];
-        int childIndex;
-        try {
-            childIndex = parent.traverseInternalNode(keyInFile);
-        } catch (RuntimeException e) {
-            System.out.print("Error while redistributing: " + e.getMessage());
-            return false;
-        }
+        childIndex = parent.traverseInternalNode(keyInFile);
 
         int indexToChange;
         if (childIndex == parent.n) {
@@ -245,16 +268,76 @@ class BTree {
     }
 
     /**
-     * Merges leaf of path and and a sibling nd percolate up 
-     * until there are no violations
+     * Merges non-root node and and the most appropraite sibling 
      *
-     * @param path An ArrayList specifying all nodes leading to the leaf that we are merging
-     * @returns True if merge is successful and no violations persist, False otherwise. 
+     * @param node The violating node
+     * @param parent The parent of node
+     * @param grandParent The parent of parent
+     * @returns True if parent now violates, false otherwise
      * @author Steven Knaack
      */
-    private boolean mergeForDelete(ArrayList<BTreeNode> path) {
+    private boolean merge(BTreeNode node, BTreeNode parent, BTreeNode grandParent) {
         // TODO Write this method
-        return false;
+
+        // find appropriate sibling
+        long key = node.keys[0];
+        int key_index =  parent.traverseInternalNode(key);
+        boolean isLastNode = key_index == parent.n;
+
+        BTreeNode nextNode;  
+        if (!isLastNode) { // usual: appropriate node is next node
+            nextNode = parent.children[key_index + 1];
+        } else {
+            nextNode = node; // nextNode is right node
+            key_index -= 1;
+            node = parent.children[key_index]; // node will refer to left node
+        }
+
+        // merge
+        long tempKey;
+        long tempValue;
+        BTreeNode tempChild;
+
+        if (!node.leaf) { // if internal take node from parent
+            long[] temp = parent.pop(key_index);
+            node.keys[node.n] = temp[0];
+            node.n++;
+
+            if (parent.n == 0 && parent.t != 1) {
+                root = node;
+            } else if (parent.n == 0) {
+                int gp_index = grandParent.traverseInternalNode(temp[0]);
+                grandParent.children[gp_index] = node;
+            } else {
+                // update parent pointer to merge node
+                parent.children[key_index] = node;
+            }
+        }
+
+        for (int i = 0; i < nextNode.n; i++) {
+            tempKey = nextNode.keys[i];
+            node.keys[node.n + i] = tempKey;
+
+            if (node.leaf) {
+                tempValue = nextNode.values[i];
+                node.values[node.n + i] = tempValue;
+            } else {
+                tempChild = nextNode.children[i];
+                node.children[node.n + i] = tempChild;
+            }
+
+            node.n++;
+        }
+
+        if (!node.leaf) { // deal with ending pointer
+            int i = nextNode.n;
+            tempChild = nextNode.children[i];
+                node.children[node.n + i] = tempChild;
+        }
+
+         node.n += nextNode.n;
+        
+        return parent.n < parent.t;
     }
 
     List<Long> print() {
