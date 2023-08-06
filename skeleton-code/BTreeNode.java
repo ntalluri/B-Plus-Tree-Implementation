@@ -1,3 +1,8 @@
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Scanner;
+
 class BTreeNode {
 
     /**
@@ -138,6 +143,56 @@ class BTreeNode {
 
         n--;
         return popped;
+    }
+
+    void writeToCSV(BTree bTree, Student student) {
+        try {
+            String fileName = "skeleton-code/Student.csv";
+            String newFileName = "skeleton-code/Student_temp_i.csv";
+
+            File inputFile = new File(fileName);
+            Scanner input = new Scanner(inputFile);
+    
+            File outputFile = new File(newFileName);
+            outputFile.createNewFile();
+            FileWriter writer = new FileWriter(outputFile);
+    
+            boolean containsStudent = false;
+            while (input.hasNextLine()) {
+                String line = input.nextLine();
+
+                String[] lineSplit = line.split(",");
+                long sid = Long.parseLong(lineSplit[0]);
+
+                if (sid == student.studentId) containsStudent = true;
+
+                writer.write(line + "\r\n");
+            }   
+            
+            if (!containsStudent) {
+                String student_str = student.studentId + "," +
+                                    student.studentName + "," +
+                                    student.major + "," +
+                                    student.level + "," +
+                                    student.age + "," + 
+                                    student.recordId + "\r\n";
+
+                writer.write(student_str);
+            }
+            
+            input.close();
+            writer.close();
+
+            inputFile.delete();
+            
+            File originalFile = new File(fileName);
+            File newFile = new File(newFileName);
+            
+            newFile.renameTo(originalFile);
+        }catch(IOException e){
+            System.err.println("An error occurred while writing to Student.csv");
+            e.printStackTrace();
+        }
     }
 
 }
