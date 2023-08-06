@@ -33,7 +33,7 @@ public class BTreeMain {
             bTree.insert(s);
         }
 
-        System.out.println(bTree.print());
+        //System.out.println(bTree.print());
 
         /** Start reading the operations now from input file */
         try {
