@@ -522,7 +522,7 @@ class BTree {
                 node = node.next;
             }
          }
-        System.out.println(listOfRecordID);
+        //System.out.println(listOfRecordID);
         return listOfRecordID;
     }
 
