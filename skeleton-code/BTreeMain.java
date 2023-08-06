@@ -29,19 +29,11 @@ public class BTreeMain {
         /** Reading the database student.csv into B+Tree Node */
         List<Student> studentsDB = getStudents();
 
-        // have to delete file after getStudents() otherwise appends all the existing students again into file 
-        // however this can't actually exist here since we aren't allowed to modify the BTreeMain.java code
-        // we will need to move this either in getStudents or do it a different way
-        File file = new File("skeleton-code/Student.csv");
-        if (file.exists() && file.delete()) {
-            System.out.println("File deleted successfully");
-        } else {
-            System.err.println("Failed to delete the file");
-        }
-
         for (Student s : studentsDB) {
             bTree.insert(s);
         }
+
+        System.out.println(bTree.print());
 
         /** Start reading the operations now from input file */
         try {
@@ -72,7 +64,7 @@ public class BTreeMain {
                                 recordID = generateUniqueRecordID(bTree);
                             }
 
-                            // System.out.println(recordID); TODO: Delete Later
+                             //System.out.println(recordID); //TODO: Delete Later
 
                             Student s = new Student(studentId, age, studentName, major, level, recordID);
                             bTree.insert(s);
@@ -121,7 +113,7 @@ public class BTreeMain {
             // randomly create a new recordID
             recordID = Math.abs(rand.nextLong());
         } while (bTree.search(recordID) != -1); // check if the generated ID already exists in the BTree
-
+    
         return recordID;
     }
 
@@ -154,6 +146,8 @@ public class BTreeMain {
             }
             studentList.add(student);
         }
+
+        scnr.close();
         return studentList;
     }
 }

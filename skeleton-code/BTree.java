@@ -1,9 +1,7 @@
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.FileWriter;
 import java.util.Scanner;
 import java.io.File;
 
@@ -119,7 +117,7 @@ class BTree {
         }
 
         // Write student to Student.csv
-        writeToCSV(student);
+        root.writeToCSV(this, student);
 
         return this;
     }
@@ -144,6 +142,10 @@ class BTree {
         } else { // if not a leaf node, find the correct child to insert into.
             while (i >= 0 && x.keys[i] > student.studentId) {
                 i--;
+            }
+
+            if (i == 0 && student.studentId < x.keys[i]) {
+                i = -1;
             }
 
             // if child is full, split and insert into the correct child.
@@ -187,7 +189,7 @@ class BTree {
 
         // make space for the new child in the parent node
         for (int j = parent.n; j > i; j--) {
-            parent.children[j + 1] = parent.children[j];
+            parent.children[j] = parent.children[j - 1];
         }
         parent.children[i + 1] = newNode;
 
@@ -206,24 +208,6 @@ class BTree {
         }
         parent.n = parent.n + 1;
     }
-
-    private void writeToCSV(Student student) {
-        try {
-            FileWriter writer = new FileWriter("skeleton-code/Student.csv", true);
-            BufferedWriter bw = new BufferedWriter(writer);
-            bw.write(student.studentId + ",");
-            bw.write(student.studentName + ",");
-            bw.write(student.major + ",");
-            bw.write(student.level + ",");
-            bw.write(student.age + ",");
-            bw.write(student.recordId + "\n");
-            bw.close();
-        }catch(IOException e){
-            System.err.println("An error occurred while writing to Student.csv");
-            e.printStackTrace();
-        }
-    }
-
 
     /**
      * Delete an existing student given a StudentID from this BTree and Student.csv
@@ -244,11 +228,12 @@ class BTree {
         long currValue; 
         int i = -1;
         do {
+            i++;
+
             if (i == keys.length) {
                 return false;
             }
 
-            i++;
             currValue = keys[i];
             
             if (currValue == 0) {
@@ -334,54 +319,47 @@ class BTree {
      * Deletes the row containing studentId from student.csv
      * 
      * @param studentId studentId of the row to bet deleted
-     * @return true if deleted, false if row DNE or an exception is thrown
      * @author Steven Knaack
      */
-    static boolean deleteFromCSV(long studentId) {
+    void deleteFromCSV(long studentId) {
         try {
             // open file reader and writer
-            String file_name = "Student.csv";
-            File input_file = new File(file_name);
-            Scanner reader = new Scanner(input_file);
+            String fileName = "skeleton-code/Student.csv";
+            String newFileName = "skeleton-code/Student_temp.csv";
 
-            File output_file = new File("Student_temp.csv");
-            FileWriter writer = new FileWriter(output_file);
+            File inputFile = new File(fileName);
+            Scanner input = new Scanner(inputFile);
+
+            File outputFile = new File(newFileName);
+            FileWriter writer = new FileWriter(outputFile);
             
-            boolean deleted = false;
-            while (reader.hasNextLine()) {
+            while (input.hasNextLine()) {
                 // get line of Student.csv
-                String line = reader.nextLine();
+                String line = input.nextLine();
 
                 String[] splitLine = line.split(",");
                 long lineStudentId = Long.parseLong(splitLine[0]);
 
                 // output line to Student_temp.csv iff line doesn't have studentId
-                if (studentId == lineStudentId) {
-                    deleted = true;
-                } else {
-                    writer.write(line);
+                if (studentId != lineStudentId) {
+                    writer.write(line + "\r\n");
                 }
             }
 
-            reader.close();
+            // delete old Student.csv and rename Student_temp.csv to Student.csv
+            input.close();
             writer.close();
 
-            if (!deleted) {
-                return false;
-            }
-
-            // delete old Student.csv and rename Student_temp.csv to Student.csv
-            input_file.delete();
-
-            File new_file_name = new File(file_name);
-            output_file.renameTo(new_file_name);
-
+            inputFile.delete();
+            
+            File originalFile = new File(fileName);
+            File newFile = new File(newFileName);
+            
+            newFile.renameTo(originalFile);
         } catch (Exception e) {
-            System.out.println("Error while deleting from Student.csv");
-            return false;
+            System.out.println("Error while deleting from Student.csv: " 
+                + e.getMessage());
         }
-
-        return true;
     }
 
     /**
@@ -497,6 +475,7 @@ class BTree {
         for (int i = 0; i < nextNode.n; i++) {
             tempKey = nextNode.keys[i];
             node.keys[node.n + i] = tempKey;
+            
 
             if (node.leaf) {
                 tempValue = nextNode.values[i];
@@ -505,14 +484,12 @@ class BTree {
                 tempChild = nextNode.children[i];
                 node.children[node.n + i] = tempChild;
             }
-
-            node.n++;
         }
 
         if (!node.leaf) { // deal with ending pointer
             int i = nextNode.n;
             tempChild = nextNode.children[i];
-                node.children[node.n + i] = tempChild;
+            node.children[node.n + i] = tempChild;
         }
 
         node.n += nextNode.n;
@@ -534,7 +511,7 @@ class BTree {
             return null;
          } else {
             // attain leftmost leaf node
-            while (node.leaf != false) {
+            while (!node.leaf) {
                 node = node.children[0];
             }
 
@@ -545,7 +522,7 @@ class BTree {
                 node = node.next;
             }
          }
-
+        System.out.println(listOfRecordID);
         return listOfRecordID;
     }
 
